@@ -10,6 +10,11 @@ def activationDerivative(x):
 def relu(x):
     return np.maximum(x,0)
 
+def which_flower(data):
+    outh1 = activation(np.dot(data, hlayer1) + bias1)
+    outo1 = activation(np.dot(outh1, softmax) + bias2)
+    print(data,'-',outo1)
+
 # untuk belajar
 bias1 = 0.35
 bias2 = 0.6
@@ -24,43 +29,55 @@ hlayer1 = np.array([
 softmax = np.array([
     [0.4, 0.45],[0.5,0.55]
 ])
-# hlayer1 = np.random.rand(2,2) # node input, node akhir
+# hlayer1 = np.random.rand(2,3) # node input, node akhir
 # hlayer2 = np.random.rand(2,2) # node input, node akhir
-# softmax = np.random.rand(2,2) # node input, node akhir
+# softmax = np.random.rand(3,2) # node input, node akhir
 
 # bias1 = np.random.rand()
 # bias2 = np.random.rand()
 bias3 = np.random.rand()
 
 input = np.array([[0.05,0.1],[2,2],[1,2],[2,1],[5,5],[6,6],[6,5],[5,6]])
-y = np.array([[0.01,0.99],[1,0],[1,0],[1,0],[0,1],[0,1],[0,1],[0,1]])
+# y = np.array([[0.01,0.99],[1,0],[1,0],[1,0],[0,1],[0,1],[0,1],[0,1]])
+y = np.array([[0.01,0.99],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0]])
+
+data = [[3,   1.5, 1],
+        [2,   1,   0],
+        [4,   1.5, 1],
+        [3,   1,   0],
+        [3.5, 0.5, 1],
+        [2,   0.5, 0],
+        [5.5, 1,   1],
+        [1,   1,   0]]
 
 learningRate = 0.5
-for i in range(10000):
+# Training Process
+for i in range(1000):
+    ri = np.random.randint(len(data))
     # temporary synapse
     syn2 = softmax
     # ForwardProp
-    outh0 = input[0]
+    outh0 = input[0] # dapatkan indeks 0 dan 1
     outh1 = activation(np.dot(outh0, hlayer1) + bias1)
     # h2Result = activation(np.dot(outh1, hlayer2) + bias2)
     outo1 = activation(np.dot(outh1, softmax) + bias2)
     totalError = np.sum(((y[0] - outo1)**2)/2)
-
     # Backprop
     # update softmax network
     dz_totalError = outo1 - y[0]
     dz_outo1 = activationDerivative(outo1)
     delta_outo1 = dz_totalError * dz_outo1 * outh1
-    delta_outo1 = 0.082167041 # dari contoh
-    softmax = softmax - learningRate * delta_outo1
+    # delta_outo1 = 0.082167041 # dari contoh
+    softmax -= learningRate * delta_outo1
 
     # update hidden network 1    
     dz_H1error = dz_totalError * dz_outo1
-    dz_H1totalError = np.sum(dz_H1error * syn2.T, axis = 1)
+    dz_H1totalError = np.sum(dz_H1error * syn2, axis = 1)
     dz_outh1 = activationDerivative(outh1)
     delta_h1 = dz_H1totalError * dz_outh1 * outh0
-    hlayer1 = hlayer1 - learningRate * delta_h1
-    print(outo1)
+    hlayer1 -= learningRate * delta_h1
+    print(totalError)
+    # print(np.argmax(outo1))
     # softmaxDelta = totalError * activationDerivative(outo1)
 
     # h2Error = np.dot(softmaxDelta,softmax.T)
@@ -73,3 +90,8 @@ for i in range(10000):
     # softmax += np.dot(h2Result.T,softmaxDelta)
     # hlayer2 += np.dot(outh1.T,h2Delta)
     # hlayer1 += np.dot(outh0.T,h1Delta)
+
+# Testing Process
+# for i in range(50):
+#     ri = np.random.randint(len(data))
+#     which_flower(data[ri][:2])
