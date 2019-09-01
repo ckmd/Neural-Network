@@ -29,9 +29,9 @@ hlayer1 = np.array([
 softmax = np.array([
     [0.4, 0.45],[0.5,0.55]
 ])
-# hlayer1 = np.random.rand(2,3) # node input, node akhir
+# hlayer1 = np.random.rand(2,2) # node input, node akhir
 # hlayer2 = np.random.rand(2,2) # node input, node akhir
-# softmax = np.random.rand(3,2) # node input, node akhir
+# softmax = np.random.rand(2,2) # node input, node akhir
 
 # bias1 = np.random.rand()
 # bias2 = np.random.rand()
@@ -39,7 +39,7 @@ bias3 = np.random.rand()
 
 input = np.array([[0.05,0.1],[2,2],[1,2],[2,1],[5,5],[6,6],[6,5],[5,6]])
 # y = np.array([[0.01,0.99],[1,0],[1,0],[1,0],[0,1],[0,1],[0,1],[0,1]])
-y = np.array([[0.01,0.99],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0]])
+y = np.array([[0,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0]])
 
 data = [[3,   1.5, 1],
         [2,   1,   0],
@@ -52,19 +52,19 @@ data = [[3,   1.5, 1],
 
 learningRate = 0.5
 # Training Process
-for i in range(1000):
+for i in range(100000):
     ri = np.random.randint(len(data))
     # temporary synapse
     syn2 = softmax
     # ForwardProp
-    outh0 = input[0] # dapatkan indeks 0 dan 1
+    outh0 = data[2][:2] # dapatkan indeks 0 dan 1
     outh1 = activation(np.dot(outh0, hlayer1) + bias1)
     # h2Result = activation(np.dot(outh1, hlayer2) + bias2)
     outo1 = activation(np.dot(outh1, softmax) + bias2)
-    totalError = np.sum(((y[0] - outo1)**2)/2)
+    totalError = np.sum(((y[2] - outo1)**2)/2)
     # Backprop
     # update softmax network
-    dz_totalError = outo1 - y[0]
+    dz_totalError = outo1 - y[2]
     dz_outo1 = activationDerivative(outo1)
     delta_outo1 = dz_totalError * dz_outo1 * outh1
     # delta_outo1 = 0.082167041 # dari contoh
@@ -76,7 +76,8 @@ for i in range(1000):
     dz_outh1 = activationDerivative(outh1)
     delta_h1 = dz_H1totalError * dz_outh1 * outh0
     hlayer1 -= learningRate * delta_h1
-    print(totalError)
+    if(i % 10000 == 0):
+        print(totalError)
     # print(np.argmax(outo1))
     # softmaxDelta = totalError * activationDerivative(outo1)
 
@@ -94,4 +95,7 @@ for i in range(1000):
 # Testing Process
 # for i in range(50):
 #     ri = np.random.randint(len(data))
-#     which_flower(data[ri][:2])
+which_flower(data[2][:2])
+which_flower(data[4][:2])
+which_flower(data[5][:2])
+which_flower(data[7][:2])
