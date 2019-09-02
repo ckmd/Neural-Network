@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import NumPyCNN as numpycnn
 
 def nonlin(x, deriv=False):
     if (deriv == True):
@@ -32,36 +33,49 @@ def replaceone(x):
                 array[i][j] = 1
     return array
 
-data = np.array([[3,   1.5],
-        [2,   1],
-        [4,   1.5],
-        [3,   1],
-        [3.5, 0.5],
-        [2,   0.5],
-        [5.5, 1],
-        [1,   1]])
-
-data = pd.read_csv('mnist_test.csv', header = None)
+data = pd.read_csv('mnist_train.csv', header = None)
 y = labelling(data.iloc[:,0].values, 10)
 data = data.iloc[:,1:].values
-data = replaceone(data)
+# data = replaceone(data)
 # target bisa diisi yaw roll pitch
 # y = np.array([[0,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0]])
 
 np.random.seed(1)
-
-syn0 = 2 * np.random.random((784,16)) - 1
+# synapse
+syn0 = 2 * np.random.random((507,16)) - 1
 syn1 = 2 * np.random.random((16,10)) - 1
 
-epoch = 50 * len(data)
+# filter / kernel
+l1_filter = np.zeros((3,3,3))
+l1_filter[0, :, :] = np.array([[[-1, 0, 1], 
+                                [-1, 0, 1], 
+                                [-1, 0, 1]]])
+l1_filter[1, :, :] = np.array([[[1,   1,  1], 
+                                [0,   0,  0], 
+                                [-1, -1, -1]]])
+l1_filter[2, :, :] = np.array([[[1,   0,  1], 
+                                [0,   1,  0], 
+                                [1,   0,  1]]])
+length = len(data)
+print(length)
+epoch = 1 * length
 for j in range(epoch):
-    #layers
-    ri = np.random.randint(len(data))
-    l0 = np.array([data[ri]])
+    # print(j)
+    ri = np.random.randint(length)
+    # convoluting layer
+    singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28
+    l1_feature_map = numpycnn.conv(singleData, l1_filter)
+    # ReLu layer
+    l1_feature_map_relu = numpycnn.relu(l1_feature_map)
+    # Pooling Layer
+    l1_feature_map_relu_pool = numpycnn.pooling(l1_feature_map_relu, 2, 2)
+    
+    # Forward Propagation
+    l0 = replaceone(np.array([l1_feature_map_relu_pool.ravel()]))
     l1 = nonlin(np.dot(l0, syn0))
     l2 = nonlin(np.dot(l1, syn1))
     
-    #backpropagation
+    # backpropagation
     l2_error = np.array([y[ri]]) - l2
     l2_delta = l2_error * nonlin(l2, deriv = True)
     l1_error = l2_delta.dot(syn1.T)
@@ -70,10 +84,20 @@ for j in range(epoch):
     # updating Synapses
     syn1 += l1.T.dot(l2_delta)
     syn0 += l0.T.dot(l1_delta)
-    if(epoch % 100 == 0):
-        print(j/epoch*100,'%')
+    if(j % 10 == 0):
+        print(j/epoch*100,'%',np.amax(l0),np.amax(l1),np.amax(l2))
+# Testing and Counting truth Rate
 benar = 0
 for i in range(epoch):
-    ri = np.random.randint(len(data))
-    benar += testing(data[ri],y[ri])
-    print('truth rate : ', benar / epoch * 100, '%')
+    ri = np.random.randint(length)
+    singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28
+    l1_feature_map = numpycnn.conv(singleData, l1_filter)
+    # ReLu layer
+    l1_feature_map_relu = numpycnn.relu(l1_feature_map)
+    # Pooling Layer
+    l1_feature_map_relu_pool = numpycnn.pooling(l1_feature_map_relu, 2, 2)
+    
+    # Forward Propagation
+    final = replaceone(np.array([l1_feature_map_relu_pool.ravel()]))
+    benar += testing(final.ravel(),y[ri])
+    print('process : ',i/epoch*100,'% truth rate : ', benar / epoch * 100, '%')
