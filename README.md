@@ -17,3 +17,11 @@ https://matthewmazur.files.wordpress.com/2018/03/neural_network-7.png
 - Layer 4  : FullConn 507 nodes
 - Layer 5  : FullConn 16 nodes
 - Layer 6  : Softmax 10
+
+# How to Use Neural Network
+- run the fully connected.py file for training the synapses based on input data
+- run the testing.py for the testing section or see the result of training
+
+# Drawbacks
+- have limitation in activation sigmoid function
+- rescale the higher number than one become one
