@@ -1,4 +1,5 @@
 import pickle
+import filters
 import numpy as np
 import pandas as pd
 import NumPyCNN as numpycnn
@@ -34,19 +35,17 @@ def replaceone(x):
                 array[i][j] = 1
     return array
 
-# filter / kernel
-l1_filter = np.zeros((3,3,3))
-l1_filter[0, :, :] = np.array([[[-1, 0, 1], 
-                                [-1, 0, 1], 
-                                [-1, 0, 1]]])
-l1_filter[1, :, :] = np.array([[[1,   1,  1], 
-                                [0,   0,  0], 
-                                [-1, -1, -1]]])
-l1_filter[2, :, :] = np.array([[[1,   0,  1], 
-                                [0,   1,  0], 
-                                [1,   0,  1]]])
+def removeOverflow(x):
+    array = x
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            if(x[i][j] > 709):
+                array[i][j] = 709
+            elif(x[i][j] < -708):
+                array[i][j] = -708
+    return array
 
-data = pd.read_csv('mnist_train.csv', header = None)
+data = pd.read_csv('mnist_test.csv', header = None)
 y = labelling(data.iloc[:,0].values, 10)
 data = data.iloc[:,1:].values
 length = len(data)
@@ -54,23 +53,22 @@ length = len(data)
 # get Synapse
 syn0 = open("syn0.pickle", "rb")
 syn0 = pickle.load(syn0)
-
 syn1 = open("syn1.pickle", "rb")
 syn1 = pickle.load(syn1)
 
 # Testing and Counting truth Rate
-epoch = 1000
+epoch = length
 benar = 0
 for i in range(epoch):
     ri = np.random.randint(length)
     singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28
-    l1_feature_map = numpycnn.conv(singleData, l1_filter)
+    l1_feature_map = numpycnn.conv(singleData, filters.filter)
     # ReLu layer
     l1_feature_map_relu = numpycnn.relu(l1_feature_map)
     # Pooling Layer
     l1_feature_map_relu_pool = numpycnn.pooling(l1_feature_map_relu, 2, 2)
     
     # Forward Propagation
-    final = replaceone(np.array([l1_feature_map_relu_pool.ravel()]))
+    final = np.array([l1_feature_map_relu_pool.ravel()])
     benar += testing(final.ravel(),y[ri])
     print('process : ',i/epoch*100,'% truth rate : ', benar / epoch * 100, '%')

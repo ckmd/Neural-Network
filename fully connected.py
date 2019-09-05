@@ -2,6 +2,10 @@ import pickle
 import numpy as np
 import pandas as pd
 import NumPyCNN as numpycnn
+from PIL import Image
+import time
+import filters
+start = time.time()
 
 def nonlin(x, deriv=False):
     if (deriv == True):
@@ -25,7 +29,17 @@ def replaceone(x):
                 array[i][j] = 1
     return array
 
-data = pd.read_csv('mnist_train.csv', header = None)
+def removeOverflow(x):
+    array = x
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            if(x[i][j] > 709):
+                array[i][j] = 709
+            elif(x[i][j] < -708):
+                array[i][j] = -708
+    return array
+
+data = pd.read_csv('mnist_test.csv', header = None)
 y = labelling(data.iloc[:,0].values, 10)
 data = data.iloc[:,1:].values
 # data = replaceone(data)
@@ -34,36 +48,25 @@ data = data.iloc[:,1:].values
 
 np.random.seed(1)
 # synapse
-syn0 = 2 * np.random.random((507,16)) - 1
-syn1 = 2 * np.random.random((16,10)) - 1
+syn0 = 2 * np.random.random((676,100)) - 1
+syn1 = 2 * np.random.random((100,10)) - 1
 
-# filter / kernel
-l1_filter = np.zeros((3,3,3))
-l1_filter[0, :, :] = np.array([[[-1, 0, 1], 
-                                [-1, 0, 1], 
-                                [-1, 0, 1]]])
-l1_filter[1, :, :] = np.array([[[1,   1,  1], 
-                                [0,   0,  0], 
-                                [-1, -1, -1]]])
-l1_filter[2, :, :] = np.array([[[1,   0,  1], 
-                                [0,   1,  0], 
-                                [1,   0,  1]]])
 length = len(data)
 print(length)
-epoch = 1000
+epoch = 1 * length
 for j in range(epoch):
     # print(j)
     ri = np.random.randint(length)
     # convoluting layer
     singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28
-    l1_feature_map = numpycnn.conv(singleData, l1_filter)
+    l1_feature_map = numpycnn.conv(singleData, filters.filter)
     # ReLu layer
     l1_feature_map_relu = numpycnn.relu(l1_feature_map)
     # Pooling Layer
     l1_feature_map_relu_pool = numpycnn.pooling(l1_feature_map_relu, 2, 2)
     
     # Forward Propagation
-    l0 = replaceone(np.array([l1_feature_map_relu_pool.ravel()]))
+    l0 = np.array([l1_feature_map_relu_pool.ravel()])
     l1 = nonlin(np.dot(l0, syn0))
     l2 = nonlin(np.dot(l1, syn1))
     
@@ -77,7 +80,9 @@ for j in range(epoch):
     syn1 += l1.T.dot(l2_delta)
     syn0 += l0.T.dot(l1_delta)
     if(j % 10 == 0):
-        print(j/epoch*100,'%',np.amax(l0),np.amax(l1),np.amax(l2))
+        current = time.time()
+        # print(j/epoch*100,'%',np.amax(l0),np.amin(l0),np.amax(l1),np.amin(l1),np.amax(l2),np.amin(l2))
+        print(round((current - start),1),'s',round((j/epoch*100),2),'%')
 
 # save final synapse into pickle
 pickle_out = open("syn0.pickle", "wb")
@@ -87,3 +92,6 @@ pickle_out = open("syn1.pickle", "wb")
 pickle.dump(syn1, pickle_out)
 
 pickle_out.close()
+
+end = time.time()
+print(end - start)
