@@ -48,12 +48,12 @@ data = data.iloc[:,1:].values
 
 np.random.seed(1)
 # synapse
-syn0 = 2 * np.random.random((676,100)) - 1
+syn0 = 2 * np.random.random((64,100)) - 1
 syn1 = 2 * np.random.random((100,10)) - 1
 
 length = len(data)
 print(length)
-epoch = 1 * length
+epoch = 3 * length
 for j in range(epoch):
     # print(j)
     ri = np.random.randint(length)
@@ -81,8 +81,8 @@ for j in range(epoch):
     syn0 += l0.T.dot(l1_delta)
     if(j % 10 == 0):
         current = time.time()
-        # print(j/epoch*100,'%',np.amax(l0),np.amin(l0),np.amax(l1),np.amin(l1),np.amax(l2),np.amin(l2))
-        print(round((current - start),1),'s',round((j/epoch*100),2),'%')
+        # print(round((current - start),1),'s',round((j/epoch*100),2),'%')
+        print(round((current - start),1),'s',round((j/epoch*100),2),'%', round(np.amin(l0),2), round(np.amax(l0),2), round(np.amin(l1),2), round(np.amax(l1),2), round(np.amin(l2),2), round(np.amax(l2),2))
 
 # save final synapse into pickle
 pickle_out = open("syn0.pickle", "wb")

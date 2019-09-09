@@ -59,6 +59,7 @@ syn1 = pickle.load(syn1)
 # Testing and Counting truth Rate
 epoch = length
 benar = 0
+runn = 0
 for i in range(epoch):
     ri = np.random.randint(length)
     singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28
@@ -71,4 +72,5 @@ for i in range(epoch):
     # Forward Propagation
     final = np.array([l1_feature_map_relu_pool.ravel()])
     benar += testing(final.ravel(),y[ri])
-    print('process : ',i/epoch*100,'% truth rate : ', benar / epoch * 100, '%')
+    runn += 1
+    print('process : ',round(i/epoch*100,2),'% truth rate : ', round(benar / runn * 100,2), '%')

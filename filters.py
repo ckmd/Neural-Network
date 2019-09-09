@@ -4,12 +4,14 @@ import cv2
 
 def build_filters():
     filters = []
-    ksize = 3
-    for theta in np.arange(0, np.pi, np.pi / 4):
-        # getGaborKernel(Size ksize, double sigma, double theta, double lambd, double gamma, double psi=CV_PI*0.5, int ktype=CV_64F )
-        kern = cv2.getGaborKernel((ksize, ksize), 4.0, theta, 10.0, 0.5, 0, ktype=cv2.CV_32F)
-        kern /= 1.5*kern.sum()
-        filters.append(kern)
+    ksize = 31
+    lambd = [10.0,9.0,8.0,7.0]
+    for la in lambd:
+        for theta in np.arange(0, np.pi, np.pi / 4):
+            # getGaborKernel(Size ksize, double sigma, double theta, double lambd, double gamma, double psi=CV_PI*0.5, int ktype=CV_64F )
+            kern = cv2.getGaborKernel((ksize, ksize), 4.0, theta, la, 0.5, 0, ktype=cv2.CV_32F)
+            kern /= 1.5*kern.sum()
+            filters.append(kern)
     return filters
 
 filter = np.array(build_filters())
@@ -39,9 +41,12 @@ l1_filter[4, :, :] = np.array([[[1,   2,   1],
 l1_filter[5, :, :] = np.array([[[-1, -2,  -1], 
                                 [0,   0,   0], 
                                 [1,   2,   1]]])
-# for f in filter:
-#     cv2.imshow('pic',f)
-#     cv2.waitKey(2000)
-#     print(np.amax(f))
+
+if __name__ == "__main__":
+    for f in filter:
+        print(f)
+        cv2.imshow('pic',f)
+        cv2.waitKey(1000)
+        # exit()
     # if __name__ == '__main__':
     # print(filter.shape)
