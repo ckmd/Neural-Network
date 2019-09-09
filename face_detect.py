@@ -60,6 +60,6 @@ for f1 in files:
 
 data = np.array(data)
 label = np.array(label)/100
-print(label)
+print("read data complete")
 # print("detected face : ", detected)
 # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

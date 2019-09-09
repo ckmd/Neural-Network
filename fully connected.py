@@ -2,30 +2,33 @@ import numpy as np
 import pandas as pd
 import NumPyCNN as numpycnn
 import time, pickle, filters, function
+import face_detect as fd
 
 start = time.time()
 
-data = pd.read_csv('mnist_test.csv', header = None)
-y = function.labelling(data.iloc[:,0].values, 10)
-data = data.iloc[:,1:].values
-# data = replaceone(data)
+# data = pd.read_csv('mnist_test.csv', header = None)
+# y = function.labelling(data.iloc[:,0].values, 10)
+# data = data.iloc[:,1:].values
+data = fd.data
+y = fd.label
 # target bisa diisi yaw roll pitch
 # y = np.array([[0,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0]])
 
 np.random.seed(1)
 # synapse
-syn0 = 2 * np.random.random((1014,100)) - 1
-syn1 = 2 * np.random.random((100,10)) - 1
+syn0 = 2 * np.random.random((19600,100)) - 1
+syn1 = 2 * np.random.random((100,4)) - 1
 
 length = len(data)
 print(length)
-epoch = 1 * length
+epoch = 20 * length
 for j in range(epoch):
     # print(j)
     ri = np.random.randint(length)
     # convoluting layer
-    singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28
-    l1_feature_map = numpycnn.conv(singleData, filters.l1_filter)
+    # singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28 pnly for MNIST
+    singleData = data[ri]
+    l1_feature_map = numpycnn.conv(singleData, filters.filter)
     # ReLu layer
     l1_feature_map_relu = numpycnn.relu(l1_feature_map)
     # Pooling Layer
@@ -45,10 +48,10 @@ for j in range(epoch):
     # updating Synapses
     syn1 += l1.T.dot(l2_delta)
     syn0 += l0.T.dot(l1_delta)
-    if(j % 10 == 0):
+    if(j % 1 == 0):
         current = time.time()
-        # print(round((current - start),1),'s',round((j/epoch*100),2),'%')
-        print(round((current - start),1),'s',round((j/epoch*100),2),'%', round(np.amin(l0),2), round(np.amax(l0),2), round(np.amin(l1),2), round(np.amax(l1),2), round(np.amin(l2),2), round(np.amax(l2),2))
+        print(round((current - start),1),'s',round((j/epoch*100),2),'%', np.amax(l2_error))
+        # print(round((current - start),1),'s',round((j/epoch*100),2),'%', round(np.amin(l0),2), round(np.amax(l0),2), round(np.amin(l1),2), round(np.amax(l1),2), round(np.amin(l2),2), round(np.amax(l2),2))
 
 # save final synapse into pickle
 pickle_out = open("syn0.pickle", "wb")
