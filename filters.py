@@ -4,7 +4,7 @@ import cv2
 
 def build_filters():
     filters = []
-    ksize = 31
+    ksize = 7
     lambd = [10.0,9.0,8.0,7.0]
     for la in lambd:
         for theta in np.arange(0, np.pi, np.pi / 4):
@@ -48,5 +48,3 @@ if __name__ == "__main__":
         cv2.imshow('pic',f)
         cv2.waitKey(1000)
         # exit()
-    # if __name__ == '__main__':
-    # print(filter.shape)
