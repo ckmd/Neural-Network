@@ -16,26 +16,46 @@ y = fd.label
 
 np.random.seed(1)
 # synapse
-syn0 = 2 * np.random.random((19600,100)) - 1
-syn1 = 2 * np.random.random((100,4)) - 1
+syn0 = 2 * np.random.random((1280,100)) - 1
+syn1 = 2 * np.random.random((100,5)) - 1
 
 length = len(data)
 print(length)
-epoch = 20 * length
+epoch = 1 * length
 for j in range(epoch):
     # print(j)
     ri = np.random.randint(length)
     # convoluting layer
     # singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28 pnly for MNIST
     singleData = data[ri]
-    l1_feature_map = numpycnn.conv(singleData, filters.filter)
+    l1_feature_map = numpycnn.conv(singleData, filters.filter1)
     # ReLu layer
     l1_feature_map_relu = numpycnn.relu(l1_feature_map)
     # Pooling Layer
     l1_feature_map_relu_pool = numpycnn.pooling(l1_feature_map_relu, 2, 2)
+    print(l1_feature_map_relu_pool.shape, np.amax(l1_feature_map_relu_pool), np.amin(l1_feature_map_relu_pool))
+    # conv Layer 2
+#     filter2 = np.random.rand(32, 17, 17, l1_feature_map_relu_pool.shape[-1])
+    l2_feature_map = numpycnn.conv(l1_feature_map_relu_pool, filters.filter2)
+    l2_feature_map_relu = numpycnn.relu(l2_feature_map)
+    l2_feature_map_relu_pool = numpycnn.pooling(l2_feature_map_relu, 2, 2)
+    print(l2_feature_map_relu_pool.shape, np.amax(l2_feature_map_relu_pool), np.amin(l2_feature_map_relu_pool))
+    # conv Layer 3
+    filter3 = np.random.rand(64, 9, 9, l2_feature_map_relu_pool.shape[-1])
+    l3_feature_map = numpycnn.conv(l2_feature_map_relu_pool, filter3)
+    l3_feature_map_relu = numpycnn.relu(l3_feature_map)
+    l3_feature_map_relu_pool = numpycnn.pooling(l3_feature_map_relu, 2, 2)
+    print(l3_feature_map_relu_pool.shape, np.amax(l3_feature_map_relu_pool), np.amin(l3_feature_map_relu_pool))
+    # conv Layer 4
+    filter4 = np.random.rand(128, 5, 5, l3_feature_map_relu_pool.shape[-1])
+    l4_feature_map = numpycnn.conv(l3_feature_map_relu_pool, filter4)
+    l4_feature_map_relu = numpycnn.relu(l4_feature_map)
+    l4_feature_map_relu_pool = numpycnn.pooling(l4_feature_map_relu, 2, 2)
+    print(l4_feature_map_relu_pool.shape, np.amax(l4_feature_map_relu_pool), np.amin(l4_feature_map_relu_pool))
     
     # Forward Propagation
-    l0 = np.array([l1_feature_map_relu_pool.ravel()])
+    l0 = np.array([l4_feature_map_relu_pool.ravel()])
+    print(np.amax(l0), np.amin(l0))
     l1 = function.nonlin(np.dot(l0, syn0))
     l2 = function.nonlin(np.dot(l1, syn1))
     
@@ -50,7 +70,7 @@ for j in range(epoch):
     syn0 += l0.T.dot(l1_delta)
     if(j % 1 == 0):
         current = time.time()
-        print(round((current - start),1),'s',round((j/epoch*100),2),'%', np.amax(l2_error))
+        print(round((current - start),1),'s',round((j/epoch*100),2),'%')
         # print(round((current - start),1),'s',round((j/epoch*100),2),'%', round(np.amin(l0),2), round(np.amax(l0),2), round(np.amin(l1),2), round(np.amax(l1),2), round(np.amin(l2),2), round(np.amax(l2),2))
 
 # save final synapse into pickle

@@ -2,9 +2,8 @@
 import numpy as np
 import cv2
 
-def build_filters():
+def build_filters(ksize):
     filters = []
-    ksize = 7
     lambd = [10.0,9.0,8.0,7.0]
     for la in lambd:
         for theta in np.arange(0, np.pi, np.pi / 4):
@@ -14,8 +13,11 @@ def build_filters():
             filters.append(kern)
     return filters
 
-filter = np.array(build_filters())
-
+filter1 = np.array(build_filters(31))
+filter2 = []
+for i in range(32):
+    filter2.append(np.array(build_filters(17)).T)
+filter2 = np.array(filter2)
 # Custom filter / kernel
 l1_filter = np.zeros((6,3,3))
 # edge filter
@@ -43,8 +45,9 @@ l1_filter[5, :, :] = np.array([[[-1, -2,  -1],
                                 [1,   2,   1]]])
 
 if __name__ == "__main__":
-    for f in filter:
-        print(f)
-        cv2.imshow('pic',f)
-        cv2.waitKey(1000)
+    print(np.amax(filter2))
+    # for f in filter2:
+        # print(f)
+        # cv2.imshow('pic',f)
+        # cv2.waitKey(1000)
         # exit()

@@ -2,7 +2,9 @@ import cv2, os, glob, re
 import numpy as np
 
 def splitstring(word):
-    xpos, xneg, ypos, yneg = 0,0,0,0
+    label, xpos, xneg, ypos, yneg = 0, 0, 0, 0, 0
+    if(word[0:6] == "person"):
+        label = 1
     if(word[12] == "0"):# & word[16] == "0"):
         xpos = 0
     else:
@@ -18,7 +20,7 @@ def splitstring(word):
         else:
             ypos = int(word[-2:])
     # final label (yaw+, yaw-, pitch+, pitch-)
-    return xpos, xneg, ypos, yneg
+    return label, xpos, xneg, ypos, yneg
 
 # read several image
 img_dir = "face" # Enter Directory of all images 
@@ -34,17 +36,17 @@ for f1 in files:
     base = os.path.splitext(base)
     pose = splitstring(base[0])
 
-    # read patern
+    # start face detection read patern
     face_cascade = cv2.CascadeClassifier('cascades/haarcascade_frontalface_alt2.xml')
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor = 1.5, minNeighbors = 5)
-    if(len(faces) == 0):
-        continue # continue if there is no face
-    for (x,y,w,h) in faces:
-        roi_gray = gray[y:y+h , x:x+w]
+    if(len(faces) == 1):
+        for (x,y,w,h) in faces:
+            roi_gray = gray[y:y+h , x:x+w]
+    # end face detection
 
-    # Gaussian Image Pyramid
-    layer = roi_gray.copy()
+    # Gaussian Image Pyramid 2x
+    layer = gray.copy()
     gaussian_pyramid = [layer]
     for i in range(1):
         layer = cv2.pyrDown(layer)
@@ -60,6 +62,6 @@ for f1 in files:
 
 data = np.array(data)
 label = np.array(label)/100
-print("read data complete")
+print("read data complete", data.shape, label.shape)
 # print("detected face : ", detected)
 # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
