@@ -17,7 +17,8 @@ def conv_(img, conv_filter):
             curr_region = img[r-numpy.uint16(numpy.floor(filter_size/2.0)):r+numpy.uint16(numpy.ceil(filter_size/2.0)), 
                               c-numpy.uint16(numpy.floor(filter_size/2.0)):c+numpy.uint16(numpy.ceil(filter_size/2.0))]
             #Element-wise multipliplication between the current region and the filter.
-            curr_result = curr_region * conv_filter
+            # curr_result = curr_region * conv_filter
+            curr_result = curr_region * conv_filter / numpy.prod(conv_filter.shape)
             conv_sum = numpy.sum(curr_result) #Summing the result of multiplication.
             result[r, c] = conv_sum #Saving the summation in the convolution layer feature map.
             
