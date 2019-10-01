@@ -17,7 +17,7 @@ def build_filters(ksize, lamb, gamma):
 filter1 = np.array(build_filters(31,8,0.5))
 filter2 = np.array(build_filters(15,8,0.5))
 filter3 = np.array(build_filters(7,7,2))
-filter4 = np.array(build_filters(3,5,2))
+filter4 = np.array(build_filters(3,4,3))
 # Custom filter / kernel
 l1_filter = np.zeros((6,3,3))
 # edge filter
@@ -45,9 +45,8 @@ l1_filter[5, :, :] = np.array([[[-1, -2,  -1],
                                 [1,   2,   1]]])
 
 if __name__ == "__main__":
-    print(filter1[0])
-    for ind,f in enumerate(filter1):
-        print(np.amax(f))
+    for ind,f in enumerate(filter4):
+        print(np.amax(f), np.amin(f))
         cv2.imshow('pic',f)
         cv2.waitKey(1000)
         cv2.imwrite('img_name'+str(ind)+'.jpg', f * 255)

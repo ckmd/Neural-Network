@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import NumPyCNN as numpycnn
-import time, pickle, filters, function
+import time, pickle, filters, function, cv2
 import face_detect as fd
 
 start = time.time()
@@ -27,23 +27,26 @@ for j in range(1):
     ri = np.random.randint(length)
     # convoluting layer
     # singleData = np.reshape(data[ri], (-1, 28)) # reshape into 28 x 28 pnly for MNIST
-    singleData = data[ri]
+    singleData = data[ri] / 255
+    print(np.amax(singleData), np.amin(singleData))
     l1_feature_map = numpycnn.conv(singleData, filters.filter1)
     l1_feature_map_relu = numpycnn.relu(l1_feature_map)
     l1_feature_map_relu_pool = numpycnn.pooling(l1_feature_map_relu, 2, 2)
     print(l1_feature_map_relu_pool.shape, np.amax(l1_feature_map_relu_pool), np.amin(l1_feature_map_relu_pool))
 
     feature_input = []
-    for conv2 in l1_feature_map_relu_pool.T:
+    for in2, conv2 in enumerate(l1_feature_map_relu_pool.T):
         l2_feature_map = numpycnn.conv(conv2, filters.filter2)
         l2_feature_map_relu = numpycnn.relu(l2_feature_map)
         l2_feature_map_relu_pool = numpycnn.pooling(l2_feature_map_relu, 2, 2)
+        cv2.imwrite('conv1_'+str(in2)+'.jpg', conv2 * 255)
         print(l2_feature_map_relu_pool.shape, np.amax(l2_feature_map_relu_pool), np.amin(l2_feature_map_relu_pool))
 
-        for conv3 in l2_feature_map_relu_pool.T:
+        for in3,conv3 in enumerate(l2_feature_map_relu_pool.T):
             l3_feature_map = numpycnn.conv(conv3, filters.filter3)
             l3_feature_map_relu = numpycnn.relu(l3_feature_map)
             l3_feature_map_relu_pool = numpycnn.pooling(l3_feature_map_relu, 2, 2)
+            cv2.imwrite('conv2_'+str(in2)+str(in3)+'.jpg', conv3 * 255)
             print(l3_feature_map_relu_pool.shape, np.amax(l3_feature_map_relu_pool), np.amin(l3_feature_map_relu_pool))
 
             for conv4 in l3_feature_map_relu_pool.T:
